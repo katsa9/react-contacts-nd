@@ -12,15 +12,28 @@ class ListContacts extends Component {
     }
    
   updateQuery = (newQuery) => {
-    this.setState(() => ({
+    this.setState(() => ({   //always wrap in round braces when returning an object
       query: newQuery.trim()
     }));
   }  
+
+  clearQuery = () => {
+    this.updateQuery("")
+  }
   
   render() {
+    const { query } = this.state  //destructure state and props objects so we can just use the variable below.
+    const { contacts, onDelete } = this.props
+
+    const displayedContacts = query === "" 
+    ? contacts
+    : contacts.filter((c) => (
+      c.name.toLowerCase().includes(query.toLowerCase())
+    ))
+
     return (
       <div className="list-contacts">
-        {JSON.stringify(this.state)}
+        {/* {JSON.stringify(this.state)} */}
         <div className="list-contacts-top">
           <input
             className="search-contacts"
@@ -29,9 +42,15 @@ class ListContacts extends Component {
             value={this.state.query}
             onChange={(event) => this.updateQuery(event.target.value)} 
           />
-        </div>
+          </div>
+          {displayedContacts.length !== contacts.length && (
+            <div className="showing-contacts">
+             <span>Now Showing {displayedContacts.length} of {contacts.length}</span> 
+             <button onClick={this.clearQuery}>Show all</button>
+            </div> 
+          )}
         <ol className='contact-list'>
-          {this.props.contacts.map((contact) => (
+          {displayedContacts.map((contact) => (
             <li key={contact.id} className='contact-list-item'>
               <div className='contact-avatar'
                 style={{backgroundImage: `url(${contact.avatarURL})`}}>
@@ -41,7 +60,7 @@ class ListContacts extends Component {
                 <p>{contact.handle}</p>
               </div>
               <button 
-                  onClick={() => this.props.onDelete(contact)} 
+                  onClick={() => onDelete(contact)} 
                   className='contact-remove'>
                 Remove
               </button>
